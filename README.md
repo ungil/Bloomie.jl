@@ -4,7 +4,7 @@
 
 [BLPAPI](https://www.bloomberg.com/professional/support/api-library/) wrapper to retrieve data from Bloomberg. Tested only with the Desktop API on Windows.
 
-The following requests implemented: ReferenceData, HistoricalData, IntradayBar, PortfolioData, Beqs (but some of the options for HistoricalData and IntradayBar are not handled).
+The following requests are implemented: ReferenceData, HistoricalData, IntradayBar, PortfolioData, Beqs (but some of the options for HistoricalData and IntradayBar are not handled).
 
 ## Installation
 
