@@ -55,8 +55,6 @@ bdh("INDU Index",["PX_LAST","VOLUME"],"20170930",periodicity="WEEKLY")
 
 bdh(["INDU Index","SPX Index"],["PX_LAST","VOLUME"],"20170910",end_date="20170930")
 
-bdh("INDU Index",["PX_LAST","VOLUME"],"20170910"
-
 bbars("AAPL US Equity","TRADE","2017-09-27",end_date_time="2017-09-29",bar_size_minutes=60)
 
 bbars("AAPL US Equity","BID","2017-09-27T06:00:00",end_date_time="2017-09-27T09:00:00",bar_size_minutes=10)
