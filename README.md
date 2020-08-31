@@ -1,5 +1,7 @@
 # Bloomie
 
+N.B. This was written in 2017. The code has been updated in 2020 to keep up with the changes in the language but there is probably no reason to use this incomplete and mostly untested library instead of [BLPData.jl](https://github.com/felipenoris/BLPData.jl)
+
 ## Overview
 
 [BLPAPI](https://www.bloomberg.com/professional/support/api-library/) wrapper to retrieve data from Bloomberg. Tested only with the Desktop API on Windows.
@@ -67,8 +69,6 @@ bport("U12345678-1",retrieve="data")
 
 bport("U12345678-1",date="20170930",retrieve="weights")
     
-beqs("Global Automotive Parts Retailers")
-
 beqs("Fisher Inspired Screen",group="Guru Screens")
 
 bclose()

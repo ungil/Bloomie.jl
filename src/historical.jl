@@ -49,12 +49,12 @@ function bdh(tickers,fields,start_date;end_date="",periodicity="",overrides=Dict
     end
     out=process_tree(retrieve_response(),"H")
     if typeof(out) <: Tuple
-        if out[2]==nothing; warn(@sprintf "No data retrieved for %s" out[1]); end
+        if out[2]==nothing; @warn Printf.@sprintf "No data retrieved for %s" out[1] ; end
         out[2]
     else
         data = filter(x->x[2]!=nothing,out)
         nodata = filter(x->x[2]==nothing,out)
-        map(x->warn(@sprintf "No data retrieved for %s" x[1]),nodata)
+        map(x-> @warn Printf.@sprintf "No data retrieved for %s" x[1] , nodata)
         if length(data) > 0
             Dict(data)
         else

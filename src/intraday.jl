@@ -41,7 +41,7 @@ function bbars(ticker::String,event::String,start_date_time::String;end_date_tim
         blpapi_Request_destroy(request)
     end
     out = process_tree(retrieve_response())
-    if length(out) > 0
-        TimeSeriesIO.TimeArray(out, colnames=[:open, :high, :low, :close, :volume, :numEvents, :value], timestamp=:time)
+    if size(out,1) > 0
+        TimeSeries.TimeArray(out, timestamp=:time)
     end
 end

@@ -27,7 +27,7 @@ end
 function open_service(session,name)
     blpapi_Session_openService(session,name)
     service = @with_pointer service blpapi_Session_getService(session,service,name)
-    @printf "SERVICE:   %s\n" blpapi_Service_name(service)
+    Printf.@printf "SERVICE:   %s\n" blpapi_Service_name(service)
     list_service_operations(service)
     list_service_events(service)
     service
@@ -36,7 +36,7 @@ end
 function list_service_operations(service)
     for i = 0:(blpapi_Service_numOperations(service)-1)
         oper = @with_pointer oper blpapi_Service_getOperationAt(service,oper,i)
-        @printf "Operation: %s\n" blpapi_Operation_name(oper)
+        Printf.@printf "Operation: %s\n" blpapi_Operation_name(oper)
     end
 end
 
@@ -49,7 +49,7 @@ end
 function list_service_events(service)
     for i = 0:(blpapi_Service_numEventDefinitions(service)-1)
         event = @with_pointer event blpapi_Service_getEventDefinitionAt(service,event,i)
-        @printf "Event:     %s\n" get_name_and_destroy(blpapi_SchemaElementDefinition_name(event))
+        Printf.@printf "Event:     %s\n" get_name_and_destroy(blpapi_SchemaElementDefinition_name(event))
     end
 end
 
@@ -59,7 +59,7 @@ function bopen(;host::String="",port::Int=0)
     global services
     if session == nothing
         version = get_version()
-        @printf "BLPAPI DLL version %d.%d.%d.%d\n" version[1] version[2] version[3] version[4]
+        Printf.@printf "BLPAPI DLL version %d.%d.%d.%d\n" version[1] version[2] version[3] version[4]
         services = Dict()
         session = create_session(host=host,port=port)
         blpapi_Session_start(session)

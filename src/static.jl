@@ -48,7 +48,7 @@ function bdp(tickers,fields;overrides=Dict())
     if typeof(out[1]) <: Dict
         data = [row for row in filter(x->typeof(x)<:Dict,out)]
         nodata = filter(x->!(typeof(x)<:Dict),out)
-        map(x->warn(@sprintf "No data retrieved for %s" x[1]),nodata)
+        map(x->warn(Printf.@sprintf "No data retrieved for %s" x[1]),nodata)
         if length(data) > 0
             DataFrames.DataFrame(data)
         else
@@ -58,7 +58,7 @@ function bdp(tickers,fields;overrides=Dict())
         out = vcat(out...)
         data = filter(x->x[2]!=nothing,out)
         nodata = filter(x->x[2]==nothing,out)
-        map(x->warn(@sprintf "No data retrieved for %s" x[1]),nodata)
+        map(x-> @warn Printf.@sprintf "No data retrieved for %s" x[1] , nodata)
         if length(data) > 0
             Dict(data)
             if single_security

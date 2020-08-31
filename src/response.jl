@@ -7,38 +7,38 @@ global bulk_fields = ["IEST_BRAND_PRODUCT_LIST","BLOOMBERG_PEERS",
 
 function flatten_all(a)
     while any(x-> !(typeof(x)==String) && (typeof(x)<:Array || typeof(x)<:Tuple), a)
-        a = vcat([typeof(x)==String?[x]:collect(Base.Iterators.flatten([x])) for x in a]...)
+        a = vcat([typeof(x)==String ? [x] : collect(Base.Iterators.flatten([x])) for x in a]...)
     end
     a
 end
-            
+
 function date(val)
     # BLPAPI_DATETIME_YEAR_PART | ..._MONTH_PART | ..._DAY_PART
     @assert val.parts == 0x01 | 0x02 | 0x04
-    DateTime(val.year,val.month,val.day)
+    Dates.DateTime(val.year,val.month,val.day)
 end
 
 function datetime(val)
     # BLPAPI_DATETIME_YEAR_PART | ..._MONTH_PART | ..._DAY_PART | ..._HOURS_PART | ..._MINUTES_PART | ..._SECONDS_PART | ..._MILLISECONDS_PART
     @assert val.parts == 0x01 | 0x02 | 0x04 | 0x10 | 0x20 | 0x40 | 0x80
-    DateTime(val.year,val.month,val.day,val.hours,val.minutes,val.seconds,val.milliSeconds)
+    Dates.DateTime(val.year,val.month,val.day,val.hours,val.minutes,val.seconds,val.milliSeconds)
 end
 
 function decode_value(element,datatype,i)
     @Match.match datatype begin
-        1 => begin val=Ref{Int32}(0); blpapi_Element_getValueAsBool(element,Ref(val),i); Bool(val[]) end
+        1 => begin val=Ref{Int32}(0); blpapi_Element_getValueAsBool(element,val,i); Bool(val[]) end
         2 => error("BLPAPI_DATATYPE_CHAR")
         3 => error("BLPAPI_DATATYPE_BYTE")
-        4 => begin val=Ref{Int32}(0); blpapi_Element_getValueAsInt32(element,Ref(val),i); val[] end
-        5 => begin val=Ref{Int64}(0); blpapi_Element_getValueAsInt64(element,Ref(val),i); val[] end
-        6 => begin val=Ref{Float32}(0); blpapi_Element_getValueAsFloat32(element,Ref(val),i); val[] end
-        7 => begin val=Ref{Float64}(0); blpapi_Element_getValueAsFloat64(element,Ref(val),i); val[] end
-        8 => begin val=Ref{Ptr{UInt8}}(0); blpapi_Element_getValueAsString(element,Ref(val),i); unsafe_string(val[]) end
+        4 => begin val=Ref{Int32}(0); blpapi_Element_getValueAsInt32(element,val,i); val[] end
+        5 => begin val=Ref{Int64}(0); blpapi_Element_getValueAsInt64(element,val,i); val[] end
+        6 => begin val=Ref{Float32}(0); blpapi_Element_getValueAsFloat32(element,val,i); val[] end
+        7 => begin val=Ref{Float64}(0); blpapi_Element_getValueAsFloat64(element,val,i); val[] end
+        8 => begin val=Ref{Ptr{UInt8}}(0); blpapi_Element_getValueAsString(element,val,i); unsafe_string(val[]) end
         9 => error("BLPAPI_DATATYPE_BYTEARRAY")
-        10 => begin val=blpapi_Datetime(0,0,0,0,0,0,0,0,0); blpapi_Element_getValueAsDatetime(element,Ref(val),i); date(val); end
+        10 => begin val=blpapi_Datetime(0,0,0,0,0,0,0,0,0); blpapi_Element_getValueAsDatetime(element,val,i); date(val); end
         11 => error("BLPAPI_DATATYPE_TIME")
         12 => error("BLPAPI_DATATYPE_DECIMAL")
-        13 => begin val=blpapi_Datetime(0,0,0,0,0,0,0,0,0); blpapi_Element_getValueAsDatetime(element,Ref(val),i); datetime(val); end
+        13 => begin val=blpapi_Datetime(0,0,0,0,0,0,0,0,0); blpapi_Element_getValueAsDatetime(element,val,i); datetime(val); end
     end
 end
 
@@ -72,7 +72,7 @@ function process_message(msg)
     end
     return decode_element(contents)
 end
- 
+
 function process_event(event)
     iterator = blpapi_MessageIterator_create(event)
     done = false
@@ -124,9 +124,9 @@ function retrieve_response(timeout=10)
             if event_type == :RESPONSE || event_type == :PARTIAL_RESPONSE
                 out = vcat(out,process_event(event))
             elseif event_type == :TIMEOUT
-                warn((event_type,))
+                @warn (event_type,)
             else
-                warn((event_type,flatten_all(process_event(event))))
+                @warn (event_type,flatten_all(process_event(event)))
             end
         finally
             blpapi_Event_release(event)
@@ -155,8 +155,8 @@ end
 
 function security_data_hist(x)
     df = DataFrames.DataFrame(map(row->Dict([Symbol(k)=> process_tree(v) for (k,v) in row[2]]),x["fieldData"]))
-    if length(df) > 0
-        (x["security"][1],TimeSeriesIO.TimeArray(df,timestamp=:date))
+    if size(df,1) > 0
+        (x["security"][1],TimeSeries.TimeArray(df,timestamp=:date))
     else
         (x["security"][1],nothing)
     end
@@ -179,11 +179,11 @@ end
 
 function process_tree(x::Tuple,context="")
     @Match.match x[1] begin
-        "securityData" => context=="H"?security_data_hist(Dict(x[2])):map(x->security_data(Dict(x[2])),x[2])
+        "securityData" => context=="H" ? security_data_hist(Dict(x[2])) : map(x->security_data(Dict(x[2])),x[2])
         "barData" => bar_data(Dict(x[2]))
         "responseError" => Dict([k=>process_tree(v) for (k,v) in x[2]])
         "data" => map(a->Dict([Symbol(k)=>process_tree(v) for (k,v) in a[2][3][2]]),x[2][2][2])
-        _ => warn(["cannot handle",x])
+        _ => @warn ["cannot handle",x]
     end
 end
 
